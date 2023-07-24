@@ -12,6 +12,22 @@ struct Args {
     pos_arg: String,
 }
 
+fn exec(cmd: &str, args: &[&str]) -> String
+{
+   let output = Command::new(cmd)
+   .args(args)
+   .output()
+   .expect("failed to execute cmd");
+
+   // println!("status: {}", output.status);
+   // println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
+   // println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+   assert!(output.status.success());
+
+   String::from_utf8(output.stdout).unwrap()
+}
+
+
 fn main() {
 
     // Get target node, port, user
@@ -19,17 +35,12 @@ fn main() {
     // let host: String = format!("{}:22", args.pos_arg);
     // let user: String = env::var("USER").expect("$USER is not set");
 
-    let output = Command::new("for file in `ls /var/log/sysstat/* | \
-                                                grep -E \"sa[0-9]+$\" | sort`; do echo $file; sar -P ALL -C -f $file | \
-                                                grep Average | tail -n 1; done; \
-                                                ")
-                                    .output()
-                                    .expect("failed to execute process");
+    let ret = exec("sh", &["-c", "for file in `ls /var/log/sysstat/* | \
+                                            grep -E \"sa[0-9]+$\" | sort`; do echo $file; \
+                                            LANG=C /usr/bin/sar -P ALL -C -f $file | \
+                                            grep Average | tail -n 1; done; \
+                                            "] );
 
-    println!("status: {}", output.status);
-    println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
-    println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
-
-    assert!(output.status.success());
+    println!("exec: <{}>", ret);
 
 }
