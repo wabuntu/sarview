@@ -1,5 +1,5 @@
-# sarview
-sysstat daily graph
+# saview
+saview prints monthly statistic graph of sysstat data.
 
 ```
 $ for file in `ls /var/log/sysstat/* | grep -E "sa[0-9]+$" | sort`; do echo $file; sar -P ALL -C -f $file |  grep Average | tail -n 1; done;
